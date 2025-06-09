@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@400;700&display=swap" rel="stylesheet">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+     <link rel="stylesheet" href="assets/styles/images/auth.php" />
+<link rel="stylesheet" href="assets/styles/style.css" />
+<link rel="stylesheet" href="assets/styles/resp.css" />
+    <title>ROSETTE - Цветы с доставкой</title>
+</head>
+<body>
+
+<!-- Header Section -->
+<header>
+  <a href="#" class="logo">ROSETTE</a>
+  <nav>
+    <a href="#advantages">Преимущества</a>
+    <a href="#flower-bouquest">Каталог</a>
+    <a href="#delivery-section">Доставка</a>
+    <a href="#contacts-section">Контакты</a>
+  </nav>
+  
+<div class="header-right">
+  <div class="buttons-container">
+    <button id="loginBtn" class="btn">Войти</button>
+    <button id="registerBtn" class="btn">Регистрация</button>
+  </div>
+
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span id="closeAuth" class="close">&times;</span>
+
+      <!-- Вход -->
+      <form id="loginForm">
+        <h2>Вход</h2>
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Пароль" required />
+        <button type="submit">Войти</button>
+        <div class="message" id="loginMessage"></div>
+        <span class="toggle-link" id="showRegisterForm">Нет аккаунта? Зарегистрироваться</span>
+      </form>
+
+      <!-- Регистрация -->
+      <form id="registerForm" style="display:none;">
+        <h2>Регистрация</h2>
+        <input type="text" name="name" placeholder="Имя" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Пароль" required />
+        <input type="password" name="passwordConfirm" placeholder="Повторите пароль" required />
+        <button type="submit">Зарегистрироваться</button>
+        <div class="message" id="registerMessage"></div>
+        <span class="toggle-link" id="showLoginForm">Уже есть аккаунт? Войти</span>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const authModal = document.getElementById('authModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const closeAuth = document.getElementById('closeAuth');
+
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+
+    // Два тестовых пользователя
+    const users = [
+      { email: 'user1@example.com', password: 'password1', name: 'Пользователь 1' },
+      { email: 'user2@example.com', password: 'password2', name: 'Пользователь 2' }
+    ];
+
+    // Открытие форм
+    loginBtn.onclick = () => {
+      authModal.style.display = 'flex';
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+      clearMessages();
+    };
+
+    registerBtn.onclick = () => {
+      authModal.style.display = 'flex';
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+      clearMessages();
+    };
+
+    closeAuth.onclick = () => {
+      authModal.style.display = 'none';
+      clearMessages();
+    };
+
+    window.onclick = (e) => {
+      if (e.target === authModal) {
+        authModal.style.display = 'none';
+        clearMessages();
+      }
+    };
+
+    document.getElementById('showRegisterForm').onclick = () => {
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+      clearMessages();
+    };
+
+    document.getElementById('showLoginForm').onclick = () => {
+      registerForm.style.display = 'none';
+      loginForm.style.display = 'block';
+      clearMessages();
+    };
+
+    function clearMessages() {
+      document.getElementById('loginMessage').textContent = '';
+      document.getElementById('registerMessage').textContent = '';
+    }
+
+    // Регистрация
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearMessages();
+
+      if (registerForm.password.value !== registerForm.passwordConfirm.value) {
+        document.getElementById('registerMessage').style.color = '#a74a76';
+        document.getElementById('registerMessage').textContent = 'Пароли не совпадают';
+        return;
+      }
+
+      const newUser = {
+        name: registerForm.name.value.trim(),
+        email: registerForm.email.value.trim(),
+        password: registerForm.password.value
+      };
+
+      // Проверка на существование пользователя с таким email
+      if (users.some(user => user.email === newUser.email)) {
+        document.getElementById('registerMessage').style.color = '#a74a76';
+        document.getElementById('registerMessage').textContent = 'Пользователь с таким email уже существует.';
+        return;
+      }// Добавляем нового пользователя в список
+      users.push(newUser);
+
+      document.getElementById('registerMessage').style.color = 'green';
+      document.getElementById('registerMessage').textContent = 'Регистрация успешна! Теперь войдите.';
+      registerForm.reset();
+    });
+
+    // Вход
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearMessages();
+
+      const email = loginForm.email.value.trim();
+      const password = loginForm.password.value;
+
+      // Находим пользователя по email и паролю
+      const user = users.find(user => user.email === email && user.password === password);
+
+      if (user) {
+        document.getElementById('loginMessage').style.color = 'green';
+       document.getElementById('loginMessage').textContent = 'Вы успешно вошли, ${user.name}!';
+        loginForm.reset();
+        authModal.style.display = 'none';
+      } else {
+        document.getElementById('loginMessage').style.color = '#a74a76';
+        document.getElementById('loginMessage').textContent = 'Такого аккаунта не существует или неверный пароль.';
+      }
+    });
+  </script>
+</div>
+</header>
+
+
+<section id="main-banner">
+<!-- Main Banner -->
+    <div class="main-banner">
+        <h1>ДАРИТЕ РАДОСТЬ С<br>НАШИМИ БУКЕТАМИ</h1>
+        <p>Свежие цветы с доставкой за 2 часа в<br>любую точку города</p>
+        <button id="btn-bouquest1" class="btn">Выбрать букет</button>
+    </div>
+</section>
+
+<section id="categories">
+<!-- Categories Section -->
+<h2 class="categories-title">Наши категории</h2>
+<div class="categories">
+    <div class="category">
+        <img src="assets/images/категории свадебные букеты.png" alt="Свадебные букеты">
+        <div class="info">
+            <h3>Свадебные букеты</h3>
+            <p>Особенные композиции для самого важного дня</p>
+        </div>
+    </div>
+    <div class="category">
+        <img src="assets/images/категории комнатные растения.png" alt="Комнатные растения">
+        <div class="info">
+            <h3>Комнатные растения</h3>
+            <p>Зеленые друзья для уюта в вашем доме</p>
+        </div>
+    </div>
+    <div class="category">
+        <img src="assets/images/категории подарочные наборы.png" alt="Подарочные наборы">
+        <div class="info">
+            <h3>Подарочные наборы</h3>
+            <p>Цветы и сладости для особенного сюрприза</p>
+        </div>
+    </div>
+</div>
+</section>
+
+<section id="advantages">
+<!-- Advantages Section -->
+<div class="advantages">
+    <h2>НАШИ ПРЕИМУЩЕСТВА</h2>
+    <div class="advantage">
+        <img src="assets/images/преимущества доставка.png" alt="Доставка за 2 часа">
+        <h3>Доставка за 2 часа</h3>
+        <p>Привозим ваш заказ в любую точку города в течение 2 часов после оформления.</p>
+    </div>
+    <div class="advantage">
+        <img src="assets/images/преимущества свежесть.png" alt="100% свежесть">
+        <h3>100% свежесть</h3>
+        <p>Гарантируем свежесть цветов до 7 дней или вернем деньги.</p>
+    </div>
+    <div class="advantage">
+        <img src="assets/images/преимущества открытка.png" alt="Бесплатная открытка">
+        <h3>Бесплатная открытка</h3>
+        <p>К каждому заказу прилагается поздравительная открытка с вашими пожеланиями.</p>
+    </div>
+</div>
+</section>
+
+<section id="flower-bouquets">
+<!-- Flower Bouquets Section -->
+ <section id="flower-bouquest" class="flower-bouquest"></section>
+<div class="flower-bouquets">
+    <h2>НАШИ БУКЕТЫ</h2>
+    <!-- Flower 1 -->
+    <div class="flower-item">
+        <img src="assets/images/нежный рассвет.jpeg" alt="Нежный рассвет">
+        <div class="flower-info">
+            <h3>Нежный рассвет</h3>
+            <p>Розы, хризантемы</p>
+            <span>2340 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 2 -->
+    <div class="flower-item">
+        <img src="assets/images/симфония.jpeg"  alt="Симфония">
+        <div class="flower-info">
+            <h3>Симфония</h3>
+            <p>Подсолнухи, ромашки</p>
+            <span>2000 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+   <!-- Flower 3 -->
+    <div class="flower-item">
+        <img src="assets/images/фантазия.jpeg" alt="Фантазия">
+        <div class="flower-info">
+            <h3>Фантазия</h3>
+            <p>Пионы, эвкалипт, каллы</p>
+            <span>3450 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 4 -->
+    <div class="flower-item">
+        <img src="assets/images/цветочный рай.jpeg" alt="Цветочный рай">
+        <div class="flower-info">
+            <h3>Цветочный рай</h3>
+            <p>Пионы, эвкалипт, ромашки</p>
+            <span>3100 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 5 -->
+    <div class="flower-item">
+        <img src="assets/images/лавандовый шепот.jpeg" alt="Лавандовый шепот">
+        <div class="flower-info">
+            <h3>Лавандовый шепот</h3>
+            <p>Лаванда, розы, тюльпан</p>
+            <span>4200 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 6 -->
+    <div class="flower-item">
+        <img src="assets/images/улочки парижа.jpeg" alt="Улочки Парижа">
+        <div class="flower-info">
+            <h3>Улочки Парижа</h3>
+            <p>Гипсофилы</p>
+            <span>1750 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 7 -->
+    <div class="flower-item">
+        <img src="assets/images/весенний.jpeg" alt="Весенний">
+        <div class="flower-info">
+            <h3>Весенний</h3>
+            <p>Розы, тюльпаны, орхидеи</p>
+            <span>2900 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 8 -->
+    <div class="flower-item">
+        <img src="assets/images/маленький рим.jpeg" alt="Маленький Рим">
+        <div class="flower-info">
+            <h3>Маленький Рим</h3>
+            <p>Красные розы, лилии</p>
+            <span>3300 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 9 -->
+    <div class="flower-item">
+        <img src="assets/images/белая сказка.jpeg" alt="Белая сказка">
+        <div class="flower-info">
+            <h3>Белая сказка</h3>
+            <p>Орхидеи, каллы</p>
+            <span>2200 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 10 -->
+    <div class="flower-item">
+        <img src="assets/images/сиреневые мечты.jpeg" alt="Сиреневые мечты">
+        <div class="flower-info">
+            <h3>Сиреневые мечты</h3>
+            <p>Подсолнухи, ромашки</p>
+            <span>2700 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 11 -->
+    <div class="flower-item">
+        <img src="assets/images/огненный вальс.jpeg" alt="Осенний вальс">
+        <div class="flower-info">
+            <h3>Осенний вальс</h3>
+            <p>Хризантемы</p>
+            <span>3100 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+    </div>
+    <!-- Flower 12 -->
+    <div class="flower-item">
+        <img src="assets/images/весенний бриз.jpeg" alt="Весенний бриз">
+        <div class="flower-info">
+            <h3>Весенний бриз</h3>
+            <p>Тюльпаны</p>
+            <span>3600 руб.</span>
+<button class="btn add-to-cart">В корзину</button>
+        </div>
+        <script>
+  document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', () => {
+        cartCount++;
+        cartCountElem.textContent = cartCount;
+        alert('Товар добавлен в корзину!');
+    });
+});
+</script>
+<div id="cart-icon" style="position: fixed; top: 20px; right: 20px; cursor: pointer;">
+    <img src="assets/images/cart-icon.png" alt="Корзина" width="40" />
+    <span id="cart-count" style="background: red; color: white; border-radius: 50%; padding: 2px 8px; position: absolute; top: -5px; right: -5px; font-size: 14px;">0</span>
+</div>
+<script>
+const cartCountElem = document.getElementById('cart-count');
+let cartCount = 0;
+
+// По клику на иконку корзины можно переходить на страницу корзины
+document.getElementById('cart-icon').addEventListener('click', () => {
+    window.location.href = '/cart.html'; // Путь к странице корзины
+});
+</script>
+    </div>
+</div>
+</section>
+</section>
+
+<section id="create-bouquet">
+      <!-- Create Your Bouquet Section -->
+    <div class="create-bouquet">
+        <!-- Секция с изображением букета -->
+        <div class="image-container">
+            <img src="assets/images/создай свой букет.jpg" alt="Создайте свой букет">
+        </div>
+
+        <!-- Секция с выбором параметров -->
+        <div class="form-container">
+            <h2>СОЗДАЙ СВОЙ БУКЕТ</h2>
+
+            <!-- Контейнер для всех опций (цветы, гамма, размер) -->
+            <div class="options-container">
+                <!-- Основные цветы -->
+                <div class="option">
+                    <label>Основные цветы:</label>
+                    <input type="radio" name="flowers" value="Розы" id="roses" onclick="updatePrice()"> Розы
+                    <input type="radio" name="flowers" value="Пионы" id="peonies" onclick="updatePrice()"> Пионы
+                    <input type="radio" name="flowers" value="Лилии" id="lilies" onclick="updatePrice()"> Лилии
+                    <input type="radio" name="flowers" value="Хризантемы" id="chrysanthemums" onclick="updatePrice()"> Хризантемы
+                </div>
+
+                <!-- Цветовая гамма -->
+                <div class="option">
+                    <label>Цветовая гамма:</label>
+                    <input type="radio" name="color" value="Пастельная" id="pastel" onclick="updatePrice()"> Пастельная
+                    <input type="radio" name="color" value="Яркая" id="bright" onclick="updatePrice()"> Яркая
+                    <input type="radio" name="color" value="Контрастная" id="contrasting" onclick="updatePrice()"> Контрастная
+                </div>
+            </div>
+
+            <!-- Размер -->
+            <div class="option">
+                <label>Размер букета:</label>
+                <input type="range" class="size-slider" min="1" max="3" value="2" id="sizeRange" oninput="updatePrice()">
+                <span id="sizeValue">Средний</span>
+            </div>
+
+            <div class="result">
+                Итоговая стоимость: <span id="totalCost">4300</span> руб.
+            </div>
+            <button class="btn" onclick="submitOrder()">Оформить заказ</button>
+        </div>
+    </div>
+    <script>
+        let basePrice = 4300; // Базовая цена букета
+        // Функция для обновления цены в зависимости от выбора
+        function updatePrice() {
+            let price = basePrice;
+            // Добавляем стоимость в зависимости от выбранных цветов
+            if (document.getElementById("roses").checked) {
+                price += 500;
+            } else if (document.getElementById("peonies").checked) {
+                price += 600;
+            } else if (document.getElementById("lilies").checked) {
+                price += 400;
+            } else if (document.getElementById("chrysanthemums").checked) {
+                price += 300;
+            }
+            // Добавляем стоимость в зависимости от выбранной цветовой гаммы
+            if (document.getElementById("bright").checked) {
+                price += 200;
+            } else if (document.getElementById("contrasting").checked) {
+                price += 300;
+            }
+            // Размер букета
+            const size = document.getElementById("sizeRange").value;
+            let sizeText = "Средний";
+            if (size == 1) {
+                price -= 500;
+                sizeText = "Маленький";
+            } else if (size == 3) {
+                price += 500;
+                sizeText = "Большой";
+            }
+            // Обновляем текст и цену
+            document.getElementById("sizeValue").textContent = sizeText;
+            document.getElementById("totalCost").textContent = price;
+        }
+        // Функция для оформления заказа
+        function submitOrder() {
+            alert("Ваш заказ оформлен! Мы свяжемся с вами для подтверждения.");
+        }
+    </script>
+</section>
+
+<section id="delivery-section">
+  <!-- Section for delivery -->
+    <div class="delivery-section">
+        <!-- Delivery options (small images) -->
+        <div class="delivery-options">
+            <h2>Условия доставки</h2>
+            <img src="assets/images/доставка по городу.jpg" alt="По городу">
+            <p>По городу — 450 руб. при заказе до 3000 руб. Бесплатно при заказе от 3000 руб.</p>
+            <img src="assets/images/доставка время доставки.jpg" alt="Время доставки">
+            <p>Время доставки — ежедневно с 10:00 до 22:00. Срочная доставка за 2 часа +350 руб.</p>
+            <img src="assets/images/доставка за город.jpg" alt="За город">
+            <p>За город — от 600 рублей в зависимости от расстояния. Уточните стоимость у менеджера.</p>
+        </div>
+        <!-- Map container with large map image -->
+        <div class="map-container">
+            <img src="assets/images/доставка карта.jpg" alt="Карта">
+        </div>
+    </div>
+</section>
+
+<section id="contacts-section">
+ <!-- Контакты -->
+    <div class="contacts-section">
+        <!-- Информация о магазине -->
+        <div class="store-info">
+            <h2>Наш магазин</h2>
+            <p>Адрес: г. Самара, ул. Мориса Тореза, д. 1</p>
+            <p>Телефон: +7 (937) 187 - 09 - 94</p>
+            <p>Email: <a href="mailto:ina.afanaseva.03@gmail.com">ina.afanaseva.03@gmail.com</a></p>
+            <p>Режим работы: ежедневно с 10:00 до 22:00</p>
+
+            <div class="social-links">
+                <a href="https://vk.com/an.fnsva" target="_blank"><i class="fab fa-vk">V</i></a><a href="https://wa.me/79371870994" target="_blank"><i class="fab fa-whatsapp">W</i></a>
+                <a href="https://t.me/af1nsv" target="_blank"><i class="fab fa-telegram">T</i></a>
+            </div> 
+        </div>
+        <!-- Форма обратной связи -->
+        <div class="contact-form">
+            <h2>Обратная связь</h2>
+           <form id="contactForm" action="#">
+                <input type="text" name="name" placeholder="Ваше имя" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="tel" name="phone" placeholder="Телефон" required>
+                <textarea name="message" placeholder="Ваше сообщение" rows="4" required></textarea>
+                <button type="submit">Отправить</button>
+            </form>
+            <!-- Модальное окно -->
+<div id="thankYouModal" class="modal">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <p>Спасибо за обратную связь, мы с вами свяжемся!</p>
+    </div>
+</div>
+<script>
+const form = document.getElementById('contactForm');
+const modal1 = document.getElementById('thankYouModal');
+const closeModal = document.getElementById('closeModal');
+
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    modal1.style.display = 'flex'; // показываем модалку
+    this.reset(); // очищаем форму
+});
+
+closeModal.addEventListener('click', function() {
+    modal1.style.display = 'none'; // скрываем модалку при клике на крестик
+});
+
+window.addEventListener('click', function(event) {
+    if (event.target === modal1) {
+        modal1.style.display = 'none'; // скрываем при клике вне модалки
+    }
+});
+</script>
+        </div>
+    </div>
+    </section>
+
+<section id="footer">
+   <!-- Раздел футера -->
+    <div class="footer">
+        <!-- Логотип и текст -->
+        <div>
+            <div class="footer-logo">ROSETTE</div>
+            <div class="footer-text">
+                Свежее цветы с доставкой по всей Самаре и области. Создаем букеты с любовью и вниманием к деталям.
+            </div>
+            <div class="footer-small-text">© 2025 ROSETTE. Все права защищены.</div>
+        </div>
+        <!-- Быстрые ссылки -->
+        <div class="footer-links">
+            <a href="#catalog">Каталог</a>
+            <a href="#advantages">Преимущества</a>
+            <a href="#delivery">Доставка</a>
+            <a href="#contacts">Контакты</a>
+        </div>
+        <!-- Форма для скидки -->
+        <div class="discount-form">
+            <h2>Скидка 15% на первый заказ!</h2>
+            <p>Оставьте заявку, и получите скидку на первый заказ.</p>
+            <form id="discountForm">
+                <input type="text" name="name" placeholder="Ваше имя" required>
+                <input type="email" name="email" placeholder="Ваш email" required>
+                <button type="submit">Получить скидку</button>
+            </form>
+        </div>
+    </div>
+    <!-- Модальное окно для подтверждения отправки -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Спасибо! Ваша заявка успешно отправлена. Подтверждение отправлено на вашу почту.</p>
+        </div>
+    </div>
+    <script>
+        // Получаем элементы
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("discountForm");
+        var span = document.getElementsByClassName("close")[0];
+        // Когда форма отправляется
+        btn.onsubmit = function(event) {
+            event.preventDefault(); // Предотвращаем отправку формы
+            modal.style.display = "block"; // Показываем модальное окно
+        }
+        // Когда пользователь нажимает на <span> (закрытие модального окна)
+        span.onclick = function() {
+            modal.style.display = "none"; // Закрываем модальное окно
+        }
+        // Когда пользователь кликает в любом месте вне модального окна
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none"; // Закрываем модальное окно
+            }
+        }
+    </script>
+    </section>
+    
+</body>
+</html>
